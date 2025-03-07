@@ -1,30 +1,27 @@
-import { createServer } from 'http';
-import { Server } from 'socket.io';
-import express from 'express';
-import pino from 'pino';
-import makeWASocket, {
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+const express = require('express');
+const pino = require('pino');
+const {
+  default: makeWASocket,
   useMultiFileAuthState,
   DisconnectReason,
   makeCacheableSignalKeyStore
-} from '@whiskeysockets/baileys';
-import { Boom } from '@hapi/boom';
-import { mkdir, writeFile } from 'fs/promises';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import QRCode from 'qrcode';
+} = require('@whiskeysockets/baileys');
+const { Boom } = require('@hapi/boom');
+const { mkdir } = require('fs/promises');
+const { join } = require('path');
+const QRCode = require('qrcode');
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const logger = pino({ level: 'silent' });
 const sessionsDir = join(__dirname, 'sessions');
 
 // Create sessions directory if it doesn't exist
-try {
-  await mkdir(sessionsDir, { recursive: true });
-} catch (err) {
+mkdir(sessionsDir, { recursive: true }).catch(err => {
   if (err.code !== 'EEXIST') {
     console.error('Failed to create sessions directory:', err);
   }
-}
+});
 
 const app = express();
 const server = createServer(app);
